@@ -26,17 +26,17 @@ class WaterSample < ActiveRecord::Base
   # The schema it must interact with and some sample data should be delivered 
   # with your assignment as a MySQL dump
 
-  def self.find(sample_id)
-    # spec
-    # sample2 = WaterSample.find(2)
-    # sample2.site.should == "North Hollywood Pump Station (well blend)")
-    # sample2.chloroform.should == 0.00291
-    # sample2.bromoform.should == 0.00487
-    # sample2.bromodichloromethane.should == 0.00547
-    # sample2.dibromichloromethane.should == 0.0109
+  # def self.find(sample_id)
+  #   # spec
+  #   # sample2 = WaterSample.find(2)
+  #   # sample2.site.should == "North Hollywood Pump Station (well blend)")
+  #   # sample2.chloroform.should == 0.00291
+  #   # sample2.bromoform.should == 0.00487
+  #   # sample2.bromodichloromethane.should == 0.00547
+  #   # sample2.dibromichloromethane.should == 0.0109
     
 
-  end
+  # end
 
   # Some Trihalomethanes are nastier than others, bromodichloromethane and 
   # bromoform are particularly bad. That is, water that has .060 mg/L of 
