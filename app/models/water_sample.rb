@@ -20,6 +20,9 @@
 # (from http://water.epa.gov/drink/contaminants/index.cfm#List )
 class WaterSample < ActiveRecord::Base
 
+  def trihalomethanes
+    attributes.except('id', 'site')
+  end
   # This class intends to ease the managing of the collected sample data, 
   # and assist in computing factors of the data.
   #
@@ -49,7 +52,7 @@ class WaterSample < ActiveRecord::Base
   # weights (factors).
   # 
   # Sample table of Factor weights:
-  # |  id   | chloroform_weight | bromoform_weight | bromodichloromethane_weight | dibromichloromethane_wieight |
+  # |  id   | chloroform_weight | bromoform_weight | bromodichloromethane_weight | dibromichloromethane_weight |
   # |   1   |   0.8             |      1.2         |       1.5                   |     0.7                      |
   # |   2   |   1.0             |      1.0         |       1.0                   |     1.0                      |
   # |   3   |   0.9             |      1.1         |       1.3                   |     0.6                      |
@@ -74,7 +77,9 @@ class WaterSample < ActiveRecord::Base
   # 
   #
   # Return the value of the computed factor with id of factor_weights_id
-  def factor(factor_weights_id)
+  def factor(factor_weight_id)
+    @factor_weight = FactorWeight.find(factor_weight_id)
+    weighted_hash.values.sum
     # spec:
     #  sample2 = WaterSample.find(2)
     #  sample2.factor(6) #computes the 6th factor of sample #2
@@ -82,21 +87,35 @@ class WaterSample < ActiveRecord::Base
     # Note that the factor for this example is from data not in the sample data 
     # above, that's because I want you to be sure you understand how to compute
     # this value conceptually.
+  end
 
+  def weighted_hash
+    @weighted_hash = {}
+    trihalomethanes.each_pair do |k,v|
+      @weighted_hash[(k + '_post').to_sym] = @factor_weight[(k + '_weight').to_sym] * v
+    end
+    @weighted_hash
   end
 
   # convert the object to a hash
   # if include_factors is true, inlcude all computed factors in the hash
   def to_hash(include_factors = false)
+    if include_factors == false
+      attributes
+    else
+      attributes.merge!(all_factors)
     # spec:
     #  sample2.to_hash
     #   => {:id =>2, :site => "North Hollywood Pump Station (well blend)", :chloroform => .00291, :bromoform => .00487, :bromodichloromethane => .00547 , :dibromichlormethane => .0109}
     # sample2.to_hash(true) 
     # #let's say only 3 factors exist in our factors table, with ids of 5, 6, and 9 
-    #   => {:id =>2, :site => "North Hollywood Pump Station (well blend)", :chloroform => .00291, :bromoform => .00487, :bro   modichloromethane => .00547 , :dibromichlormethane => .0109, :factor_5 => .0213, :factor_6 => .0432, :factor_9 => 0.0321}
-    
+    #   => {:id =>2, :site => "North Hollywood Pump Station (well blend)", :chloroform => .00291, :bromoform => .00487, :bromodichloromethane => .00547 , :dibromichlormethane => .0109, :factor_5 => .0213, :factor_6 => .0432, :factor_9 => 0.0321}
+    end
   end
 
+  def all_factors
+    Hash[ FactorWeight.all.map { |fw| ['factor_' + fw.id.to_s, factor(fw.id)] } ]
+  end
 
 
 end
