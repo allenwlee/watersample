@@ -79,7 +79,8 @@ class WaterSample < ActiveRecord::Base
   # Return the value of the computed factor with id of factor_weights_id
   def factor(factor_weight_id)
     @factor_weight = FactorWeight.find(factor_weight_id)
-    weighted_hash.values.sum
+    weighted_hash @factor_weight
+    @weighted_hash.values.sum
     # spec:
     #  sample2 = WaterSample.find(2)
     #  sample2.factor(6) #computes the 6th factor of sample #2
@@ -89,10 +90,10 @@ class WaterSample < ActiveRecord::Base
     # this value conceptually.
   end
 
-  def weighted_hash
+  def weighted_hash factor_weight
     @weighted_hash = {}
     trihalomethanes.each_pair do |k,v|
-      @weighted_hash[(k + '_post').to_sym] = @factor_weight[(k + '_weight').to_sym] * v
+      @weighted_hash[(k + '_post').to_sym] = factor_weight[(k + '_weight').to_sym] * v
     end
     @weighted_hash
   end
